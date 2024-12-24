@@ -1,4 +1,4 @@
-export type Response = {
+export type BollsResponse = {
 	pk: number;
 	verse: number;
 	text: string;
