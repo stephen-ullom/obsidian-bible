@@ -22,19 +22,24 @@ export class Reference {
 			throw new Error("Invalid source format");
 		}
 
-		const [, bookName, chapterText, verses] = match;
+		const [, bookName, chapterText, verseRange] = match;
 		const book = books.find((b) => b.name === bookName);
 
 		if (book === undefined) {
 			throw new Error("Invalid book name");
 		}
 
-		const chapterId = Number.parseInt(chapterText);
+		const chapter = Number(chapterText);
 
-		if (chapterId > book.chapters) {
+		if (chapter > book.chapters) {
 			throw new Error("Invalid chapter number");
 		}
 
-		return new Reference(bookName, chapterId, +verses);
+		if (verseRange.includes("-")) {
+			const [start, end] = verseRange.split("-").map(Number);
+			return new Reference(bookName, chapter, start, end - start + 1);
+		}
+
+		return new Reference(bookName, chapter, +verseRange);
 	}
 }

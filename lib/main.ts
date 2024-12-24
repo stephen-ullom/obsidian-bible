@@ -30,14 +30,14 @@ import { Reference } from "./reference";
 export default class MyPlugin extends Plugin {
 	async onload() {
 		// This creates an icon in the left ribbon.
-		this.addRibbonIcon("book-open", "Bible", (evt: MouseEvent) => {
-			// Called when the user clicks the icon.
-			new Notice("This is a notice!");
-		});
-
-		// // This adds a status bar item to the bottom of the app. Does not work on mobile apps.
-		const statusBarItemEl = this.addStatusBarItem();
-		statusBarItemEl.setText("Bible");
+		this.addRibbonIcon(
+			"book-open",
+			"Insert Bible reference",
+			(evt: MouseEvent) => {
+				// TODO: Open verse selection modal.
+				new Notice("This is a notice!");
+			}
+		);
 
 		// This adds a simple command that can be triggered anywhere
 		this.addCommand({
@@ -92,15 +92,23 @@ export default class MyPlugin extends Plugin {
 
 				try {
 					const reference = Reference.parse(source);
-					const data = await Bolls.getVerses(reference);
+					const verses = await Bolls.getVerses(reference);
 
-					if (data.length < 1) {
+					if (verses.length < 1) {
 						throw new Error("No verses found");
 					}
 
-					paragraph.empty();
-					paragraph.createEl("sup", { text: "1" });
-					paragraph.appendText(" " + data[0].text);
+					blockquote.removeChild(paragraph);
+
+					for (let index = 0; index < reference.length; index++) {
+						const verse = verses[reference.verse + index - 1];
+
+						const verseEl = blockquote.createEl("p");
+						verseEl.createEl("sup", {
+							text: verse.verse.toString(),
+						});
+						verseEl.append(" " + verse.text);
+					}
 				} catch (error) {
 					paragraph.empty();
 					paragraph.createSpan({
