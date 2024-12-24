@@ -8,6 +8,7 @@ import {
 	PluginSettingTab,
 	Setting,
 } from "obsidian";
+import { Response } from "./models/response";
 
 // Remember to rename these classes and interfaces!
 
@@ -19,20 +20,20 @@ const DEFAULT_SETTINGS: MyPluginSettings = {
 	mySetting: "default",
 };
 
-type BibleApiResponse = {
-	reference: string;
-	verses: {
-		book_id: string;
-		book_name: string;
-		chapter: number;
-		verse: number;
-		text: string;
-	}[];
-	text: string;
-	translation_id: string;
-	translation_name: string;
-	translation_note: string;
-};
+// type BibleApiResponse = {
+// 	reference: string;
+// 	verses: {
+// 		book_id: string;
+// 		book_name: string;
+// 		chapter: number;
+// 		verse: number;
+// 		text: string;
+// 	}[];
+// 	text: string;
+// 	translation_id: string;
+// 	translation_name: string;
+// 	translation_note: string;
+// };
 
 export default class MyPlugin extends Plugin {
 	settings: MyPluginSettings;
@@ -42,8 +43,8 @@ export default class MyPlugin extends Plugin {
 
 		// This creates an icon in the left ribbon.
 		const ribbonIconEl = this.addRibbonIcon(
-			"dice",
-			"Sample Plugin",
+			"book-open",
+			"Bible",
 			(evt: MouseEvent) => {
 				// Called when the user clicks the icon.
 				new Notice("This is a notice!");
@@ -102,28 +103,27 @@ export default class MyPlugin extends Plugin {
 
 			// https://bolls.life/get-text/NASB/1/1/
 
-			const verseReference = source.trim();
-			fetch(
-				`https://bible-api.com/${encodeURIComponent(
-					verseReference
-				)}?translation=asv`
-			)
+			// const verseReference = source.trim();
+			// fetch(
+			// 	`https://bible-api.com/${encodeURIComponent(
+			// 		verseReference
+			// 	)}?translation=asv`
+			// )
+			fetch(`https://bolls.life/get-text/NASB/1/1/`)
 				.then((response) => response.json())
-				.then((data: BibleApiResponse) => {
-					const reference = data.reference;
+				.then((data: Response) => {
+					// const reference = data.reference;
 					const blockquote = el.createEl("blockquote");
-					blockquote.createEl("h2", { text: reference });
 
-					data.verses.forEach((verse) => {
-						const pElement = blockquote.createEl("p");
-
-						pElement.createEl("sup", {
-							text: verse.verse.toString(),
-						});
-						pElement.appendText(" " + verse.text);
-					});
-
-					el.appendChild(blockquote);
+					blockquote.createEl("p", { text: data[0].text });
+					// data.verses.forEach((verse) => {
+					// 	const pElement = blockquote.createEl("p");
+					// 	pElement.createEl("sup", {
+					// 		text: verse.verse.toString(),
+					// 	});
+					// 	pElement.appendText(" " + verse.text);
+					// });
+					// el.appendChild(blockquote);
 				})
 				.catch((error) => {
 					console.error("Error fetching the verse:", error);
