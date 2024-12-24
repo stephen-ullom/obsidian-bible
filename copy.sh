@@ -7,5 +7,4 @@ rm -rf "$PLUGIN_DIRECTORY/obsidian-bible"
 mkdir -p "$PLUGIN_DIRECTORY/obsidian-bible"
 
 # Copy the files and directories recursively
-cp -r ./main.js "$PLUGIN_DIRECTORY/obsidian-bible"
-cp -r ./manifest.json "$PLUGIN_DIRECTORY/obsidian-bible"
+cp -r ./main.js ./manifest.json ./styles.css "$PLUGIN_DIRECTORY/obsidian-bible"

@@ -1,17 +1,23 @@
 import { BollsResponse } from "./models/bolls-response";
+import { Reference } from "./reference";
 
-const endpoint = "https://bolls.life/get-text/NASB";
+enum BibleTranslation {
+	NASB = "NASB",
+	ASV = "ASV",
+	ESV = "ESV",
+	KJV = "KJV",
+}
 
 export class Bolls {
-	constructor() {
-		console.log("Bolls constructor");
-	}
+	static readonly endpoint = "https://bolls.life/get-text";
 
-	static async getVerses(source: string): Promise<BollsResponse> {
-		const book = 1;
-		const chapter = 1;
+	static translation = BibleTranslation.NASB;
 
-		const response = await fetch(`${endpoint}/${book}/${chapter}/`);
+	static async getVerses(reference: Reference): Promise<BollsResponse> {
+		// TODO: Cache this response to reduce network requests
+		const response = await fetch(
+			`${Bolls.endpoint}/${Bolls.translation}/${reference.bookId}/${reference.chapter}/`
+		);
 		const data: BollsResponse = await response.json();
 
 		return data;

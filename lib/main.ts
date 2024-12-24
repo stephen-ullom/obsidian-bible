@@ -1,15 +1,7 @@
-import {
-	App,
-	Editor,
-	MarkdownView,
-	Modal,
-	Notice,
-	Plugin,
-	PluginSettingTab,
-	Setting,
-} from "obsidian";
+import { App, Editor, MarkdownView, Modal, Notice, Plugin } from "obsidian";
 
 import { Bolls } from "./bolls";
+import { Reference } from "./reference";
 
 // https://bible-api.com/John+3:16?translation=asv
 
@@ -90,15 +82,32 @@ export default class MyPlugin extends Plugin {
 		this.registerMarkdownCodeBlockProcessor(
 			"nasb",
 			async (source, el, ctx) => {
-				const data = await Bolls.getVerses(source);
-
 				const blockquote = el.createEl("blockquote");
 
 				blockquote.createEl("h3", { text: source });
-				const paragraph = blockquote.createEl("p");
 
-				paragraph.createEl("sup", { text: "1" });
-				paragraph.appendText(" " + data[0].text);
+				const paragraph = blockquote.createEl("p", {
+					text: "Loading...",
+				});
+
+				try {
+					const reference = Reference.parse(source);
+					const data = await Bolls.getVerses(reference);
+
+					if (data.length < 1) {
+						throw new Error("No verses found");
+					}
+
+					paragraph.empty();
+					paragraph.createEl("sup", { text: "1" });
+					paragraph.appendText(" " + data[0].text);
+				} catch (error) {
+					paragraph.empty();
+					paragraph.createSpan({
+						text: error.message,
+						cls: "warning-text",
+					});
+				}
 			}
 		);
 	}
