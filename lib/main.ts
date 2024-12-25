@@ -36,7 +36,7 @@ export default class MyPlugin extends Plugin {
             (evt: MouseEvent) => {
                 // TODO: Open verse selection modal.
                 new Notice("This is a notice!");
-            },
+            }
         );
 
         // This adds a simple command that can be triggered anywhere
@@ -83,9 +83,7 @@ export default class MyPlugin extends Plugin {
             "nasb",
             async (source, el, ctx) => {
                 const blockquote = el.createEl("blockquote");
-
-                blockquote.createEl("h4", { text: source });
-
+                const header = blockquote.createEl("h4", { text: source });
                 const paragraph = blockquote.createEl("p", {
                     text: "Loading...",
                 });
@@ -99,6 +97,8 @@ export default class MyPlugin extends Plugin {
                     }
 
                     blockquote.removeChild(paragraph);
+
+                    header.innerText = `${reference.book.name} ${reference.chapter}:${reference.verse}`;
 
                     for (let index = 0; index < reference.length; index++) {
                         const verse = verses[reference.verse + index - 1];
@@ -116,7 +116,7 @@ export default class MyPlugin extends Plugin {
                         cls: "warning-text",
                     });
                 }
-            },
+            }
         );
     }
 
