@@ -1,4 +1,4 @@
-PLUGIN_DIRECTORY="$HOME/Documents/Obsidian/Development Vault/.obsidian/plugins"
+PLUGIN_DIRECTORY="$HOME/Library/Mobile Documents/iCloud~md~obsidian/Documents/.obsidian/plugins"
 
 # Clear the folder before copying
 rm -rf "$PLUGIN_DIRECTORY/obsidian-bible"

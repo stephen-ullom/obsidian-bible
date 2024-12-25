@@ -1,5 +1,5 @@
 export type BollsResponse = {
-	pk: number;
-	verse: number;
-	text: string;
+    pk: number;
+    verse: number;
+    text: string;
 }[];

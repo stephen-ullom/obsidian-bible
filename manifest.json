@@ -1,10 +1,10 @@
 {
-	"id": "obsidian-bible",
-	"name": "Bible",
-	"version": "0.1.0",
-	"minAppVersion": "0.15.0",
-	"description": "Quote the Bible in Obsidian",
-	"author": "Stephen Ullom",
-	"authorUrl": "https://stephenullom.com",
-	"isDesktopOnly": false
+    "id": "obsidian-bible",
+    "name": "Bible",
+    "version": "0.1.0",
+    "minAppVersion": "0.15.0",
+    "description": "Quote the Bible in Obsidian",
+    "author": "Stephen Ullom",
+    "authorUrl": "https://stephenullom.com",
+    "isDesktopOnly": false
 }

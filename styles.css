@@ -8,5 +8,5 @@ If your plugin does not need CSS, delete this file.
 */
 
 .warning-text {
-	color: var(--color-red);
+    color: var(--color-red);
 }
