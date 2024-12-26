@@ -2,30 +2,7 @@ import { App, Editor, MarkdownView, Modal, Notice, Plugin } from "obsidian";
 
 import { Bolls } from "./bolls";
 import { Reference } from "./reference";
-
-// https://bible-api.com/John+3:16?translation=asv
-
-// const verseReference = source.trim();
-// fetch(
-// 	`https://bible-api.com/${encodeURIComponent(
-// 		verseReference
-// 	)}?translation=asv`
-// )
-
-// type BibleApiResponse = {
-// 	reference: string;
-// 	verses: {
-// 		book_id: string;
-// 		book_name: string;
-// 		chapter: number;
-// 		verse: number;
-// 		text: string;
-// 	}[];
-// 	text: string;
-// 	translation_id: string;
-// 	translation_name: string;
-// 	translation_note: string;
-// };
+import { translations } from "./constants/translations";
 
 export default class MyPlugin extends Plugin {
     async onload() {
@@ -79,45 +56,49 @@ export default class MyPlugin extends Plugin {
             },
         });
 
-        this.registerMarkdownCodeBlockProcessor(
-            "nasb",
-            async (source, el, ctx) => {
-                const blockquote = el.createEl("blockquote");
-                const header = blockquote.createEl("h4", { text: source });
-                const paragraph = blockquote.createEl("p", {
-                    text: "Loading...",
-                });
-
-                try {
-                    const reference = Reference.parse(source);
-                    const verses = await Bolls.getVerses(reference);
-
-                    if (verses.length < 1) {
-                        throw new Error("No verses found");
-                    }
-
-                    blockquote.removeChild(paragraph);
-
-                    header.innerText = `${reference.book.name} ${reference.chapter}:${reference.verse}`;
-
-                    for (let index = 0; index < reference.length; index++) {
-                        const verse = verses[reference.verse + index - 1];
-
-                        const verseEl = blockquote.createEl("p");
-                        verseEl.createEl("sup", {
-                            text: verse.verse.toString(),
-                        });
-                        verseEl.append(" " + verse.text);
-                    }
-                } catch (error) {
-                    paragraph.empty();
-                    paragraph.createSpan({
-                        text: error.message,
-                        cls: "warning-text",
+        for (const translation of translations) {
+            this.registerMarkdownCodeBlockProcessor(
+                translation.shortName,
+                async (source, element, ctx) => {
+                    const blockquote = element.createEl("blockquote");
+                    const header = blockquote.createEl("h4", { text: source });
+                    const paragraph = blockquote.createEl("p", {
+                        text: "Loading...",
                     });
+
+                    try {
+                        const reference = Reference.parse(
+                            translation.shortName,
+                            source
+                        );
+                        const verses = await Bolls.getVerses(reference);
+
+                        if (verses.length < 1) {
+                            throw new Error("No verses found");
+                        }
+
+                        blockquote.removeChild(paragraph);
+                        header.setText(reference.toString());
+
+                        for (let index = 0; index < reference.length; index++) {
+                            const verse = verses[reference.verse + index - 1];
+
+                            const verseElement = blockquote.createEl("p");
+                            verseElement.createEl("sup", {
+                                text: verse.verse.toString(),
+                            });
+                            verseElement.append(" " + verse.text);
+                        }
+                    } catch (error) {
+                        paragraph.empty();
+                        paragraph.createSpan({
+                            text: error.message,
+                            cls: "warning-text",
+                        });
+                    }
                 }
-            }
-        );
+            );
+        }
     }
 
     onunload() {}

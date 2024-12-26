@@ -1,7 +1,13 @@
 import { books } from "./constants/books";
 
 export class Reference {
-    constructor(book: string, chapter: number, verse: number, length = 1) {
+    constructor(
+        public readonly translation: string,
+        book: string,
+        readonly chapter: number,
+        readonly verse: number,
+        readonly length = 1
+    ) {
         const bookIndex = books.findIndex((b) => {
             const bookName = book.toLowerCase();
             const isNameMatch = b.name.toLowerCase() === bookName;
@@ -20,20 +26,17 @@ export class Reference {
         if (chapter < 1 || chapter > books[bookIndex].chapters) {
             throw new Error("Invalid chapter number");
         }
-
-        this.chapter = chapter;
-        this.verse = verse;
-        this.length = length;
     }
 
     get book() {
         return books[this.bookId - 1];
     }
 
+    get key() {
+        return `${this.translation}-${this.book.name}-${this.chapter}`;
+    }
+
     readonly bookId: number;
-    readonly chapter: number;
-    readonly verse: number;
-    readonly length: number;
 
     toString() {
         if (this.length > 1) {
@@ -45,7 +48,7 @@ export class Reference {
         return `${this.book.name} ${this.chapter}:${this.verse}`;
     }
 
-    static parse(text: string): Reference {
+    static parse(translation: string, text: string): Reference {
         const match = text.match(/^(\d?\s*\w+)\s+(\d+):(\d+(?:-\d+)?)$/);
         if (!match) {
             throw new Error("Invalid source format");
@@ -56,6 +59,7 @@ export class Reference {
         if (verseRange.includes("-")) {
             const [start, end] = verseRange.split("-").map(Number);
             return new Reference(
+                translation,
                 bookName,
                 Number(chapter),
                 start,
@@ -63,6 +67,11 @@ export class Reference {
             );
         }
 
-        return new Reference(bookName, Number(chapter), +verseRange);
+        return new Reference(
+            translation,
+            bookName,
+            Number(chapter),
+            +verseRange
+        );
     }
 }
