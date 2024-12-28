@@ -1,10 +1,18 @@
-import { App, Editor, MarkdownView, Modal, Notice, Plugin } from "obsidian";
+import {
+    App,
+    Editor,
+    MarkdownView,
+    Modal,
+    Notice,
+    Plugin,
+    setIcon,
+} from "obsidian";
 
 import { Bolls } from "./bolls";
 import { Reference } from "./reference";
 import { translations } from "./constants/translations";
 
-export default class MyPlugin extends Plugin {
+export default class BiblePlugin extends Plugin {
     async onload() {
         // This creates an icon in the left ribbon.
         this.addRibbonIcon(
@@ -60,9 +68,36 @@ export default class MyPlugin extends Plugin {
             this.registerMarkdownCodeBlockProcessor(
                 translation.shortName,
                 async (source, element, ctx) => {
-                    const blockquote = element.createEl("blockquote");
-                    const header = blockquote.createEl("h4", { text: source });
-                    const paragraph = blockquote.createEl("p", {
+                    const callout = element.createDiv({
+                        cls: "callout",
+                        attr: { "data-callout": "quote" },
+                    });
+
+                    // Title
+                    const title = callout.createDiv({
+                        cls: "callout-title",
+                    });
+
+                    const icon = title.createDiv({ cls: "callout-icon" });
+                    const titleText = title.createDiv({
+                        cls: "callout-title-inner",
+                        text: source,
+                    });
+                    setIcon(icon, "book-open-text");
+
+                    // TODO: Replace the existing `code-block-flair` text with the translation name
+                    // Add the translation label
+                    // callout.createDiv({
+                    //     cls: "callout-translation-label",
+                    //     text: translation.shortName,
+                    // });
+
+                    // Content
+                    const content = callout.createDiv({
+                        cls: "callout-content",
+                    });
+
+                    const paragraph = content.createEl("p", {
                         text: "Loading...",
                     });
 
@@ -77,24 +112,33 @@ export default class MyPlugin extends Plugin {
                             throw new Error("No verses found");
                         }
 
-                        blockquote.removeChild(paragraph);
-                        header.setText(reference.toString());
+                        titleText.setText(reference.toString());
+                        content.empty();
 
                         for (let index = 0; index < reference.length; index++) {
                             const verse = verses[reference.verse + index - 1];
+                            const verseElement = callout.createEl("p");
 
-                            const verseElement = blockquote.createEl("p");
+                            // Add verse number
                             verseElement.createEl("sup", {
                                 text: verse.verse.toString(),
                             });
-                            verseElement.append(" " + verse.text);
+
+                            // Split the text at <br/>
+                            const parts = verse.text.split("<br/>");
+
+                            for (const [index, part] of parts.entries()) {
+                                const isLastItem = index === parts.length - 1;
+
+                                verseElement.createSpan({ text: part });
+
+                                if (!isLastItem) {
+                                    verseElement.createEl("br");
+                                }
+                            }
                         }
                     } catch (error) {
-                        paragraph.empty();
-                        paragraph.createSpan({
-                            text: error.message,
-                            cls: "warning-text",
-                        });
+                        paragraph.setText(error.message);
                     }
                 }
             );

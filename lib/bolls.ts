@@ -11,15 +11,19 @@ export class Bolls {
         const chapter = Bolls.cache[reference.key];
         if (chapter) return chapter;
 
-        // Fetch from API
-        const response = await fetch(
-            `${Bolls.endpoint}/${reference.translation}/${reference.bookId}/${reference.chapter}/`
-        );
-        const data: BollsResponse = await response.json();
+        try {
+            // Fetch from API
+            const response = await fetch(
+                `${Bolls.endpoint}/${reference.translation}/${reference.bookId}/${reference.chapter}/`
+            );
+            const data: BollsResponse = await response.json();
 
-        // Cache the data
-        Bolls.cache[reference.key] = data;
+            // Cache the data
+            Bolls.cache[reference.key] = data;
 
-        return data;
+            return data;
+        } catch (error) {
+            throw Error("Failed to fetch data");
+        }
     }
 }
