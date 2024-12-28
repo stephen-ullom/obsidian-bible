@@ -49,7 +49,7 @@ export class Reference {
     }
 
     static parse(translation: string, text: string): Reference {
-        const match = text.match(/^(\d?\s*\w+)\s+(\d+):(\d+(?:-\d+)?)$/);
+        const match = text.trim().match(/^(\d?\s*\w+)\s+(\d+):(\d+(?:-\d+)?)$/);
         if (!match) {
             throw new Error("Invalid source format");
         }

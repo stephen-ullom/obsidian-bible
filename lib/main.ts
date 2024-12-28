@@ -1,67 +1,20 @@
-import {
-    App,
-    Editor,
-    MarkdownView,
-    Modal,
-    Notice,
-    Plugin,
-    setIcon,
-} from "obsidian";
+import { Editor, MarkdownView, Plugin, setIcon } from "obsidian";
 
 import { Bolls } from "./bolls";
 import { Reference } from "./reference";
 import { translations } from "./constants/translations";
+import { BibleModal } from "./bible-modal";
+
+const bibleIcon = "book-open-text";
 
 export default class BiblePlugin extends Plugin {
     async onload() {
-        // This creates an icon in the left ribbon.
-        this.addRibbonIcon(
-            "book-open",
-            "Insert Bible reference",
-            (evt: MouseEvent) => {
-                // TODO: Open verse selection modal.
-                new Notice("This is a notice!");
-            }
-        );
-
-        // This adds a simple command that can be triggered anywhere
         this.addCommand({
-            id: "open-sample-modal-simple",
-            name: "Open sample modal (simple)",
-            callback: () => {
-                new SampleModal(this.app).open();
-            },
-        });
-
-        // This adds an editor command that can perform some operation on the current editor instance
-        this.addCommand({
-            id: "sample-editor-command",
-            name: "Sample editor command",
-            editorCallback: (editor: Editor, view: MarkdownView) => {
-                console.log(editor.getSelection());
-                editor.replaceSelection("Sample Editor Command");
-            },
-        });
-
-        // This adds a complex command that can check whether the current state of the app allows execution of the command
-        this.addCommand({
-            id: "open-sample-modal-complex",
-            name: "Open sample modal (complex)",
-            checkCallback: (checking: boolean) => {
-                // Conditions to check
-                const markdownView =
-                    this.app.workspace.getActiveViewOfType(MarkdownView);
-                if (markdownView) {
-                    // If checking is true, we're simply "checking" if the command can be run.
-                    // If checking is false, then we want to actually perform the operation.
-                    if (!checking) {
-                        new SampleModal(this.app).open();
-                    }
-
-                    // This command will only show up in Command Palette when the check function returns true
-                    return true;
-                }
-            },
+            id: "insert-bible-callout-command",
+            name: "Insert callout",
+            icon: bibleIcon,
+            editorCallback: (editor: Editor, view: MarkdownView) =>
+                new BibleModal(this.app, editor).open(),
         });
 
         for (const translation of translations) {
@@ -83,7 +36,7 @@ export default class BiblePlugin extends Plugin {
                         cls: "callout-title-inner",
                         text: source,
                     });
-                    setIcon(icon, "book-open-text");
+                    setIcon(icon, bibleIcon);
 
                     // Content
                     const content = callout.createDiv({
@@ -114,7 +67,7 @@ export default class BiblePlugin extends Plugin {
 
                             // Add verse number
                             verseElement.createEl("sup", {
-                                text: verse.verse.toString(),
+                                text: `${verse.verse} `,
                             });
 
                             // Split the text at '<br/>'
@@ -139,20 +92,4 @@ export default class BiblePlugin extends Plugin {
     }
 
     onunload() {}
-}
-
-class SampleModal extends Modal {
-    constructor(app: App) {
-        super(app);
-    }
-
-    onOpen() {
-        const { contentEl } = this;
-        contentEl.setText("Woah!");
-    }
-
-    onClose() {
-        const { contentEl } = this;
-        contentEl.empty();
-    }
 }
