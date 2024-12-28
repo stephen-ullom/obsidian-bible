@@ -85,13 +85,6 @@ export default class BiblePlugin extends Plugin {
                     });
                     setIcon(icon, "book-open-text");
 
-                    // TODO: Replace the existing `code-block-flair` text with the translation name
-                    // Add the translation label
-                    // callout.createDiv({
-                    //     cls: "callout-translation-label",
-                    //     text: translation.shortName,
-                    // });
-
                     // Content
                     const content = callout.createDiv({
                         cls: "callout-content",
@@ -117,14 +110,14 @@ export default class BiblePlugin extends Plugin {
 
                         for (let index = 0; index < reference.length; index++) {
                             const verse = verses[reference.verse + index - 1];
-                            const verseElement = callout.createEl("p");
+                            const verseElement = content.createEl("p");
 
                             // Add verse number
                             verseElement.createEl("sup", {
                                 text: verse.verse.toString(),
                             });
 
-                            // Split the text at <br/>
+                            // Split the text at '<br/>'
                             const parts = verse.text.split("<br/>");
 
                             for (const [index, part] of parts.entries()) {
