@@ -59,15 +59,15 @@ export default class BibleCalloutPlugin extends Plugin {
             text: "Loading...",
         });
 
-        const reference = Reference.parse(translation.shortName, source);
+        try {
+            const reference = Reference.parse(translation.shortName, source);
 
-        if (reference) {
             callout.title.setText(reference.toString());
 
             await this.loadVerses(reference, callout);
-        } else {
-            callout.title.setText("Error");
-            paragraph.setText(`Unknown reference: '${source.trim()}'`);
+        } catch (error) {
+            callout.title.setText(`${translation.shortName} - Error`);
+            paragraph.setText(error.message);
         }
     }
 
@@ -96,27 +96,24 @@ export default class BibleCalloutPlugin extends Plugin {
     }
 
     private async loadVerses(reference: Reference, callout: Callout) {
+        const verses = await Bolls.getVerses(reference);
+
+        if (verses.length < 1) {
+            throw new Error(`No verses found`);
+        }
+
+        // Remove loading text
         callout.content.empty();
 
-        try {
-            const verses = await Bolls.getVerses(reference);
-
-            if (verses.length < 1) {
-                throw new Error(`No verses found`);
-            }
-
-            if (reference.verse) {
-                this.displaySpecifiedVerses(
-                    reference.verse,
-                    reference.length,
-                    verses,
-                    callout.content
-                );
-            } else {
-                this.displayAllVerses(verses, callout.content);
-            }
-        } catch (error) {
-            callout.content.createEl("p", { text: error.message });
+        if (reference.verse) {
+            this.displaySpecifiedVerses(
+                reference.verse,
+                reference.length,
+                verses,
+                callout.content
+            );
+        } else {
+            this.displayAllVerses(verses, callout.content);
         }
     }
 
@@ -131,7 +128,7 @@ export default class BibleCalloutPlugin extends Plugin {
                 const verseData = verses[verse + index - 1];
 
                 if (!verseData) {
-                    throw new Error(`Verse '${verse + index}' not found`);
+                    throw new Error(`Could not find verse ${verse + index}`);
                 }
 
                 this.createVerseElement(

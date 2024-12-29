@@ -42,12 +42,14 @@ export class Reference {
         return `${this.translation} - ${this.book.name} ${this.chapter}`;
     }
 
-    static parse(translation: string, text: string): Reference | null {
+    static parse(translation: string, text: string): Reference {
         const match = text
             .trim()
             .match(/^(\d?\s*\w+)\s+(\d+)(?::(\d+(?:-\d+)?))?$/);
 
-        if (!match) return null;
+        if (!match) {
+            throw new Error("Invalid reference format");
+        }
 
         const [, bookName, chapter, verseRange] = match;
 
