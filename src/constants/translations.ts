@@ -1,4 +1,4 @@
-import { Translation } from "lib/models/translation";
+import { Translation } from "src/models/translation";
 
 export const translations: Translation[] = [
     {

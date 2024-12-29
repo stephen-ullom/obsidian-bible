@@ -11,7 +11,8 @@
     },
     "keywords": [
         "obsidian",
-        "bible"
+        "bible",
+        "plugin"
     ],
     "author": "Stephen Ullom",
     "license": "MIT",
