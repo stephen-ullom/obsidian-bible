@@ -4,6 +4,8 @@ import { Bolls } from "./bolls";
 import { translations } from "./constants/translations";
 import { Translation } from "./models/translation";
 import { Reference } from "./reference";
+import { Callout } from "./models/callout";
+import { BollsResponse } from "./models/bolls-response";
 
 export default class BibleCalloutPlugin extends Plugin {
     private iconName = "book-open-text";
@@ -51,18 +53,37 @@ export default class BibleCalloutPlugin extends Plugin {
         source: string,
         element: HTMLElement
     ) {
+        const callout = this.createCallout(element);
+
+        const paragraph = callout.content.createEl("p", {
+            text: "Loading...",
+        });
+
+        const reference = Reference.parse(translation.shortName, source);
+
+        if (reference) {
+            callout.title.setText(reference.toString());
+
+            await this.loadVerses(reference, callout);
+        } else {
+            callout.title.setText("Error");
+            paragraph.setText(`Unknown reference: '${source.trim()}'`);
+        }
+    }
+
+    private createCallout(element: HTMLElement): Callout {
         const callout = element.createDiv({
             cls: "callout",
             attr: { "data-callout": "quote" },
         });
 
         // Title
-        const title = callout.createDiv({
+        const titleContainer = callout.createDiv({
             cls: "callout-title",
         });
 
-        const icon = title.createDiv({ cls: "callout-icon" });
-        const titleText = title.createDiv({ cls: "callout-title-inner" });
+        const icon = titleContainer.createDiv({ cls: "callout-icon" });
+        const title = titleContainer.createDiv({ cls: "callout-title-inner" });
 
         setIcon(icon, this.iconName);
 
@@ -70,64 +91,66 @@ export default class BibleCalloutPlugin extends Plugin {
         const content = callout.createDiv({
             cls: "callout-content",
         });
-        const paragraph = content.createEl("p", {
-            text: "Loading...",
-        });
 
-        const reference = Reference.parse(translation.shortName, source);
+        return { title, content };
+    }
 
-        if (reference) {
-            titleText.setText(reference.toString());
+    private async loadVerses(reference: Reference, callout: Callout) {
+        callout.content.empty();
 
-            try {
-                const verses = await Bolls.getVerses(reference);
+        try {
+            const verses = await Bolls.getVerses(reference);
 
-                if (verses.length < 1) {
-                    throw new Error(`No verses found`);
-                }
-
-                content.empty();
-
-                if (reference.verse) {
-                    // Display specified verses
-                    try {
-                        for (let index = 0; index < reference.length; index++) {
-                            const verse = verses[reference.verse + index - 1];
-
-                            if (!verse) {
-                                throw new Error(
-                                    `Verse '${
-                                        reference.verse + index
-                                    }' not found`
-                                );
-                            }
-
-                            this.createVerseElement(
-                                content,
-                                verse.verse,
-                                verse.text
-                            );
-                        }
-                    } catch (error) {
-                        content.empty();
-                        content.createEl("p", { text: error.message });
-                    }
-                } else {
-                    // Display all verses in the chapter
-                    for (const verse of verses) {
-                        this.createVerseElement(
-                            content,
-                            verse.verse,
-                            verse.text
-                        );
-                    }
-                }
-            } catch (error) {
-                paragraph.setText(error.message);
+            if (verses.length < 1) {
+                throw new Error(`No verses found`);
             }
-        } else {
-            titleText.setText("Error");
-            paragraph.setText(`Unknown reference: '${source.trim()}'`);
+
+            if (reference.verse) {
+                this.displaySpecifiedVerses(
+                    reference.verse,
+                    reference.length,
+                    verses,
+                    callout.content
+                );
+            } else {
+                this.displayAllVerses(verses, callout.content);
+            }
+        } catch (error) {
+            callout.content.createEl("p", { text: error.message });
+        }
+    }
+
+    private displaySpecifiedVerses(
+        verse: number,
+        length: number,
+        verses: BollsResponse,
+        content: Callout["content"]
+    ) {
+        try {
+            for (let index = 0; index < length; index++) {
+                const verseData = verses[verse + index - 1];
+
+                if (!verseData) {
+                    throw new Error(`Verse '${verse + index}' not found`);
+                }
+
+                this.createVerseElement(
+                    content,
+                    verseData.verse,
+                    verseData.text
+                );
+            }
+        } catch (error) {
+            content.createEl("p", { text: error.message });
+        }
+    }
+
+    private displayAllVerses(
+        verses: BollsResponse,
+        content: Callout["content"]
+    ) {
+        for (const verse of verses) {
+            this.createVerseElement(content, verse.verse, verse.text);
         }
     }
 

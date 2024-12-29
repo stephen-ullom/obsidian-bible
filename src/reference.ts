@@ -28,22 +28,22 @@ export class Reference {
         }
     }
 
-    public get book() {
+    get book() {
         return books[this.bookId - 1];
     }
 
-    public get key() {
+    get key() {
         return `${this.translation}-${this.book.name}-${this.chapter}`;
     }
 
-    public readonly bookId: number;
+    readonly bookId: number;
 
-    public toString() {
+    toString() {
         // return `${this.book.name} ${this.chapter} - ${this.translation}`;
         return `${this.translation} - ${this.book.name} ${this.chapter}`;
     }
 
-    public static parse(translation: string, text: string): Reference | null {
+    static parse(translation: string, text: string): Reference | null {
         const match = text
             .trim()
             .match(/^(\d?\s*\w+)\s+(\d+)(?::(\d+(?:-\d+)?))?$/);
