@@ -1,9 +1,9 @@
 {
-    "id": "obsidian-bible",
-    "name": "Bible",
+    "id": "bible-callout",
+    "name": "Bible Callout",
     "version": "0.1.0",
     "minAppVersion": "0.15.0",
-    "description": "Quote the Bible in Obsidian",
+    "description": "Callout Bible verses in Obsidian",
     "author": "Stephen Ullom",
     "authorUrl": "https://stephenullom.com",
     "isDesktopOnly": false

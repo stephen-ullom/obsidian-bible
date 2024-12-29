@@ -1,7 +1,7 @@
 {
-    "name": "obsidian-bible",
+    "name": "obsidian-bible-callout",
     "version": "0.1.0",
-    "description": "Quote the Bible in Obsidian",
+    "description": "Callout Bible verses in Obsidian",
     "main": "main.js",
     "scripts": {
         "dev": "node esbuild.config.mjs",

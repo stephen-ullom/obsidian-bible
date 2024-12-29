@@ -7,7 +7,7 @@ import { BibleModal } from "./bible-modal";
 
 const bibleIcon = "book-open-text";
 
-export default class BiblePlugin extends Plugin {
+export default class BibleCalloutPlugin extends Plugin {
     async onload() {
         this.addCommand({
             id: "insert-bible-callout-command",
