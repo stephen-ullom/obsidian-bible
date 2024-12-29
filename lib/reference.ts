@@ -5,7 +5,7 @@ export class Reference {
         public readonly translation: string,
         book: string,
         readonly chapter: number,
-        readonly verse: number,
+        readonly verse?: number,
         readonly length = 1
     ) {
         const bookIndex = books.findIndex((b) => {
@@ -28,36 +28,42 @@ export class Reference {
         }
     }
 
-    get book() {
+    public get book() {
         return books[this.bookId - 1];
     }
 
-    get key() {
+    public get key() {
         return `${this.translation}-${this.book.name}-${this.chapter}`;
     }
 
-    readonly bookId: number;
+    public readonly bookId: number;
 
-    toString() {
-        if (this.length > 1) {
-            return `${this.book.name} ${this.chapter}:${this.verse}-${
-                this.verse + this.length - 1
-            }`;
-        }
+    public toString() {
+        const versePart = this.verse
+            ? `${this.verse}${
+                  this.length > 1 ? `-${this.verse + this.length - 1}` : ""
+              }`
+            : "";
 
-        return `${this.book.name} ${this.chapter}:${this.verse}`;
+        return `${this.book.name} ${this.chapter}${
+            versePart ? `:${versePart}` : ""
+        } (${this.translation})`;
     }
 
-    static parse(translation: string, text: string): Reference {
-        const match = text.trim().match(/^(\d?\s*\w+)\s+(\d+):(\d+(?:-\d+)?)$/);
+    public static parse(translation: string, text: string): Reference {
+        const match = text
+            .trim()
+            .match(/^(\d?\s*\w+)\s+(\d+)(?::(\d+(?:-\d+)?))?$/);
+
         if (!match) {
             throw new Error("Invalid source format");
         }
 
         const [, bookName, chapter, verseRange] = match;
 
-        if (verseRange.includes("-")) {
+        if (verseRange?.includes("-")) {
             const [start, end] = verseRange.split("-").map(Number);
+
             return new Reference(
                 translation,
                 bookName,
@@ -71,7 +77,7 @@ export class Reference {
             translation,
             bookName,
             Number(chapter),
-            +verseRange
+            Number(verseRange) || undefined
         );
     }
 }

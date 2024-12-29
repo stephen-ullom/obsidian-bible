@@ -5,15 +5,15 @@ import { translations } from "./constants/translations";
 import { Translation } from "./models/translation";
 import { Reference } from "./reference";
 
-const bibleIcon = "book-open-text";
-
 export default class BibleCalloutPlugin extends Plugin {
+    private iconName = "book-open-text";
+
     async onload() {
         for (const translation of translations) {
             this.addCommand({
                 id: `insert-${translation.shortName.toLowerCase()}-bible-callout-command`,
                 name: `Insert ${translation.shortName} callout`,
-                icon: bibleIcon,
+                icon: this.iconName,
                 editorCallback: (editor: Editor, view: MarkdownView) =>
                     this.insertCalloutCallback(translation, editor),
             });
@@ -66,7 +66,7 @@ export default class BibleCalloutPlugin extends Plugin {
             cls: "callout-title-inner",
             text: source,
         });
-        setIcon(icon, bibleIcon);
+        setIcon(icon, this.iconName);
 
         // Content
         const content = callout.createDiv({
@@ -88,30 +88,47 @@ export default class BibleCalloutPlugin extends Plugin {
             titleText.setText(reference.toString());
             content.empty();
 
-            for (let index = 0; index < reference.length; index++) {
-                const verse = verses[reference.verse + index - 1];
-                const verseElement = content.createEl("p");
+            if (reference.verse) {
+                // Display specified verses
+                for (let index = 0; index < reference.length; index++) {
+                    const verse = verses[reference.verse + index - 1];
 
-                // Add verse number
-                verseElement.createEl("sup", {
-                    text: `${verse.verse} `,
-                });
-
-                // Split the text at '<br/>'
-                const parts = verse.text.split("<br/>");
-
-                for (const [index, part] of parts.entries()) {
-                    const isLastItem = index === parts.length - 1;
-
-                    verseElement.createSpan({ text: part });
-
-                    if (!isLastItem) {
-                        verseElement.createEl("br");
-                    }
+                    this.createVerseElement(content, verse.verse, verse.text);
+                }
+            } else {
+                // Display all verses in the chapter
+                for (const verse of verses) {
+                    this.createVerseElement(content, verse.verse, verse.text);
                 }
             }
         } catch (error) {
             paragraph.setText(error.message);
+        }
+    }
+
+    private createVerseElement(
+        parent: HTMLElement,
+        verse: number,
+        text: string
+    ) {
+        const verseElement = parent.createEl("p");
+
+        // Add verse number
+        verseElement.createEl("sup", {
+            text: `${verse} `,
+        });
+
+        // Split the text at '<br/>'
+        const parts = text.split("<br/>");
+
+        for (const [index, part] of parts.entries()) {
+            const isLastItem = index === parts.length - 1;
+
+            verseElement.createSpan({ text: part });
+
+            if (!isLastItem) {
+                verseElement.createEl("br");
+            }
         }
     }
 }
