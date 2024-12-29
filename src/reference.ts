@@ -39,7 +39,6 @@ export class Reference {
     readonly bookId: number;
 
     toString() {
-        // return `${this.book.name} ${this.chapter} - ${this.translation}`;
         return `${this.translation} - ${this.book.name} ${this.chapter}`;
     }
 
