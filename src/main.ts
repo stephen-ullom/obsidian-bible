@@ -62,47 +62,72 @@ export default class BibleCalloutPlugin extends Plugin {
         });
 
         const icon = title.createDiv({ cls: "callout-icon" });
-        const titleText = title.createDiv({
-            cls: "callout-title-inner",
-            text: source,
-        });
+        const titleText = title.createDiv({ cls: "callout-title-inner" });
+
         setIcon(icon, this.iconName);
 
         // Content
         const content = callout.createDiv({
             cls: "callout-content",
         });
-
         const paragraph = content.createEl("p", {
             text: "Loading...",
         });
 
-        try {
-            const reference = Reference.parse(translation.shortName, source);
-            const verses = await Bolls.getVerses(reference);
+        const reference = Reference.parse(translation.shortName, source);
 
-            if (verses.length < 1) {
-                throw new Error("No verses found");
-            }
-
+        if (reference) {
             titleText.setText(reference.toString());
-            content.empty();
 
-            if (reference.verse) {
-                // Display specified verses
-                for (let index = 0; index < reference.length; index++) {
-                    const verse = verses[reference.verse + index - 1];
+            try {
+                const verses = await Bolls.getVerses(reference);
 
-                    this.createVerseElement(content, verse.verse, verse.text);
+                if (verses.length < 1) {
+                    throw new Error(`No verses found`);
                 }
-            } else {
-                // Display all verses in the chapter
-                for (const verse of verses) {
-                    this.createVerseElement(content, verse.verse, verse.text);
+
+                content.empty();
+
+                if (reference.verse) {
+                    // Display specified verses
+                    try {
+                        for (let index = 0; index < reference.length; index++) {
+                            const verse = verses[reference.verse + index - 1];
+
+                            if (!verse) {
+                                throw new Error(
+                                    `Verse '${
+                                        reference.verse + index
+                                    }' not found`
+                                );
+                            }
+
+                            this.createVerseElement(
+                                content,
+                                verse.verse,
+                                verse.text
+                            );
+                        }
+                    } catch (error) {
+                        content.empty();
+                        content.createEl("p", { text: error.message });
+                    }
+                } else {
+                    // Display all verses in the chapter
+                    for (const verse of verses) {
+                        this.createVerseElement(
+                            content,
+                            verse.verse,
+                            verse.text
+                        );
+                    }
                 }
+            } catch (error) {
+                paragraph.setText(error.message);
             }
-        } catch (error) {
-            paragraph.setText(error.message);
+        } else {
+            titleText.setText("Error");
+            paragraph.setText(`Unknown reference: '${source.trim()}'`);
         }
     }
 

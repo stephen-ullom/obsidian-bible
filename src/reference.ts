@@ -39,25 +39,16 @@ export class Reference {
     public readonly bookId: number;
 
     public toString() {
-        const versePart = this.verse
-            ? `${this.verse}${
-                  this.length > 1 ? `-${this.verse + this.length - 1}` : ""
-              }`
-            : "";
-
-        return `${this.book.name} ${this.chapter}${
-            versePart ? `:${versePart}` : ""
-        } (${this.translation})`;
+        // return `${this.book.name} ${this.chapter} - ${this.translation}`;
+        return `${this.translation} - ${this.book.name} ${this.chapter}`;
     }
 
-    public static parse(translation: string, text: string): Reference {
+    public static parse(translation: string, text: string): Reference | null {
         const match = text
             .trim()
             .match(/^(\d?\s*\w+)\s+(\d+)(?::(\d+(?:-\d+)?))?$/);
 
-        if (!match) {
-            throw new Error("Invalid source format");
-        }
+        if (!match) return null;
 
         const [, bookName, chapter, verseRange] = match;
 
