@@ -4,10 +4,10 @@
     "description": "Callout Bible verses in Obsidian",
     "main": "main.js",
     "scripts": {
-        "dev": "node esbuild.config.mjs",
-        "build": "tsc -noEmit -skipLibCheck && node esbuild.config.mjs production",
-        "version": "node version-bump.mjs && git add manifest.json versions.json",
-        "deploy": "sh install.sh"
+        "dev": "node scripts/esbuild.config.mjs",
+        "build": "tsc -noEmit -skipLibCheck && node scripts/esbuild.config.mjs production",
+        "version": "node scripts/version-bump.mjs && git add manifest.json versions.json",
+        "deploy": "sh scripts/install.sh"
     },
     "keywords": [
         "obsidian",
