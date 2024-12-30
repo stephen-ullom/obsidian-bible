@@ -1,13 +1,14 @@
 {
     "name": "obsidian-bible-callout",
-    "version": "0.1.1",
+    "version": "0.1.2",
     "description": "Callout Bible verses in Obsidian",
     "main": "main.js",
     "scripts": {
         "dev": "node scripts/esbuild.config.mjs",
         "build": "tsc -noEmit -skipLibCheck && node scripts/esbuild.config.mjs production",
         "version": "node scripts/version-bump.mjs && git add manifest.json versions.json",
-        "deploy": "sh scripts/install.sh"
+        "deploy": "sh scripts/install.sh",
+        "test": "jest"
     },
     "keywords": [
         "obsidian",
@@ -23,8 +24,11 @@
         "@typescript-eslint/parser": "5.29.0",
         "builtin-modules": "3.3.0",
         "esbuild": "0.17.3",
+        "jest": "^27.0.0",
         "obsidian": "latest",
         "tslib": "2.4.0",
-        "typescript": "4.7.4"
+        "typescript": "4.7.4",
+        "ts-jest": "^27.1.5",
+        "@types/jest": "^27.0.0"
     }
 }
